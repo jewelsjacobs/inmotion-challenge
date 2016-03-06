@@ -26,13 +26,13 @@ function completeCb() {
     require.ensure([], function (require) {
         var angular = require('angular');
 
-        require('./app/mApp');
+        require('./app/movieApp');
 
         // hide loader
         $('.loader').hide();
 
         // run app
-        angular.bootstrap(document, ['mApp'], { strictDi: true });
+        angular.bootstrap(document, ['movieApp'], { strictDi: true });
     });
 }
 

@@ -4,8 +4,8 @@ import loader from '../../utilities/loader';
 
 var log = debug('Ctrls');
 
-mCtrls.controller('MyCtrl', function ($scope) {
+mCtrls.controller('MovieViewCtrl', ($scope, $stateParams, MovieService) => {
     log('test');
-    $scope.test = 'test';
+    $scope.movie = MovieService.getMovie($stateParams.id);
     console.log(loader.getLoader('main').getResult('app-data'));
 });

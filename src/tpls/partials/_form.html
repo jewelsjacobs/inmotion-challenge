@@ -1,0 +1,35 @@
+<div class="form-group">
+    <label for="title" class="col-sm-2 control-label">Title</label>
+    <div class="col-sm-10">
+        <input type="text" ng-model="movie.title" class="form-control" id="title" placeholder="Movie Title Here"/>
+    </div>
+</div>
+<div class="form-group">
+    <label for="year" class="col-sm-2 control-label">Year</label>
+    <div class="col-sm-10">
+        <input type="text" ng-model="movie.year" class="form-control" id="year" placeholder="When was the movie released?"/>
+    </div>
+</div>
+<div class="form-group">
+    <label for="actors" class="col-sm-2 control-label">Actors</label>
+    <div class="col-sm-10">
+        <input type="text" ng-model="movie.actors" class="form-control" id="actors" placeholder="Who were the actors? Add comma seperated list for multiple, i.e. 'Tom Cruise, Tim Robbins'"/>
+    </div>
+</div>
+<div class="form-group">
+    <label for="genre" class="col-sm-2 control-label">Genre</label>
+    <div class="col-sm-10">
+        <input type="text" ng-model="movie.genre" class="form-control" id="genre" placeholder="Movie genre here"/>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-2 control-label">Movie Rating</label>
+    <div class="col-sm-10">
+        <star-rating ng-model="movie.rating"></star-rating>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <input type="submit" class="btn btn-primary" value="Save"/>
+    </div>
+</div>

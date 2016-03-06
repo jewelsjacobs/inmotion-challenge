@@ -30464,45 +30464,61 @@ webpackJsonp([1],{
 
 	var _angularUiRouter2 = _interopRequireDefault(_angularUiRouter);
 
-	var _loader = __webpack_require__(310);
+	var _angularLocalStorage = __webpack_require__(310);
+
+	var _angularLocalStorage2 = _interopRequireDefault(_angularLocalStorage);
+
+	var _loader = __webpack_require__(312);
 
 	var _loader2 = _interopRequireDefault(_loader);
 
-	var _loader3 = __webpack_require__(318);
+	var _loader3 = __webpack_require__(320);
 
 	var _loader4 = _interopRequireDefault(_loader3);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _loader5 = __webpack_require__(330);
 
-	/*
-	import mDirectives from './directives/_loader';
-	import mServices from './services/_loader';
-	*/
+	var _loader6 = _interopRequireDefault(_loader5);
+
+	var _loader7 = __webpack_require__(334);
+
+	var _loader8 = _interopRequireDefault(_loader7);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	/**
 	 * Register main angular app
 	 */
-	_angular2.default.module('mApp', [_angularTouch2.default, _angularSanitize2.default, _angularUiRouter2.default, _loader2.default, _loader4.default]).config(["$stateProvider", "$locationProvider", "$urlRouterProvider", function ($stateProvider, $locationProvider, $urlRouterProvider) {
+	_angular2.default.module('movieApp', [_angularTouch2.default, _angularSanitize2.default, _angularUiRouter2.default, _angularLocalStorage2.default, _loader2.default, _loader4.default, _loader6.default, _loader8.default]).config(["$stateProvider", "$locationProvider", "localStorageServiceProvider", "$urlRouterProvider", function ($stateProvider, $locationProvider, localStorageServiceProvider, $urlRouterProvider) {
 	    'ngInject';
 
-	    $stateProvider.state('home', {
-	        url: '/',
-	        templateUrl: 'tpls/views/home.html',
-	        controller: 'MyCtrl'
-	    }).state('page1', {
-	        url: '/page1',
-	        templateUrl: 'tpls/views/page1.html',
-	        controller: 'MyCtrl'
-	    }).state('page1.detail', {
-	        url: '/detail',
-	        templateUrl: 'tpls/views/detail.html',
-	        controller: 'DetailCtrl'
+	    $stateProvider.state('movies', {
+	        url: '/movies',
+	        templateUrl: 'tpls/partials/movies.html',
+	        controller: 'MovieListCtrl'
+	    }).state('viewMovie', {
+	        url: '/movies/:id/view',
+	        templateUrl: 'tpls/partials/movie-view.html',
+	        controller: 'MovieViewCtrl'
+	    }).state('newMovie', {
+	        url: '/movies/new',
+	        templateUrl: 'tpls/partials/movie-add.html',
+	        controller: 'MovieCreateCtrl'
+	    }).state('editMovie', {
+	        url: '/movies/:id/edit',
+	        templateUrl: 'tpls/partials/movie-edit.html',
+	        controller: 'MovieEditCtrl'
 	    });
 
-	    $urlRouterProvider.otherwise('/');
-
 	    $locationProvider.html5Mode(true);
-		}]);
+
+	    localStorageServiceProvider.setPrefix('movieApp');
+	    $urlRouterProvider.otherwise(function ($injector) {
+	        var $state = $injector.get('$state');
+
+	        $state.go('movies');
+	    });
+		}]).constant('API', 'localStorage');
 
 /***/ },
 
@@ -36532,12 +36548,465 @@ webpackJsonp([1],{
 /***/ 310:
 /***/ function(module, exports, __webpack_require__) {
 
+	__webpack_require__(311);
+	module.exports = 'LocalStorageModule';
+
+
+/***/ },
+
+/***/ 311:
+/***/ function(module, exports) {
+
+	var isDefined = angular.isDefined,
+	  isUndefined = angular.isUndefined,
+	  isNumber = angular.isNumber,
+	  isObject = angular.isObject,
+	  isArray = angular.isArray,
+	  extend = angular.extend,
+	  toJson = angular.toJson;
+
+	angular
+	  .module('LocalStorageModule', [])
+	  .provider('localStorageService', function() {
+	    // You should set a prefix to avoid overwriting any local storage variables from the rest of your app
+	    // e.g. localStorageServiceProvider.setPrefix('yourAppName');
+	    // With provider you can use config as this:
+	    // myApp.config(function (localStorageServiceProvider) {
+	    //    localStorageServiceProvider.prefix = 'yourAppName';
+	    // });
+	    this.prefix = 'ls';
+
+	    // You could change web storage type localstorage or sessionStorage
+	    this.storageType = 'localStorage';
+
+	    // Cookie options (usually in case of fallback)
+	    // expiry = Number of days before cookies expire // 0 = Does not expire
+	    // path = The web path the cookie represents
+	    this.cookie = {
+	      expiry: 30,
+	      path: '/'
+	    };
+
+	    // Send signals for each of the following actions?
+	    this.notify = {
+	      setItem: true,
+	      removeItem: false
+	    };
+
+	    // Setter for the prefix
+	    this.setPrefix = function(prefix) {
+	      this.prefix = prefix;
+	      return this;
+	    };
+
+	    // Setter for the storageType
+	    this.setStorageType = function(storageType) {
+	      this.storageType = storageType;
+	      return this;
+	    };
+
+	    // Setter for cookie config
+	    this.setStorageCookie = function(exp, path) {
+	      this.cookie.expiry = exp;
+	      this.cookie.path = path;
+	      return this;
+	    };
+
+	    // Setter for cookie domain
+	    this.setStorageCookieDomain = function(domain) {
+	      this.cookie.domain = domain;
+	      return this;
+	    };
+
+	    // Setter for notification config
+	    // itemSet & itemRemove should be booleans
+	    this.setNotify = function(itemSet, itemRemove) {
+	      this.notify = {
+	        setItem: itemSet,
+	        removeItem: itemRemove
+	      };
+	      return this;
+	    };
+
+	    this.$get = ['$rootScope', '$window', '$document', '$parse', function($rootScope, $window, $document, $parse) {
+	      var self = this;
+	      var prefix = self.prefix;
+	      var cookie = self.cookie;
+	      var notify = self.notify;
+	      var storageType = self.storageType;
+	      var webStorage;
+
+	      // When Angular's $document is not available
+	      if (!$document) {
+	        $document = document;
+	      } else if ($document[0]) {
+	        $document = $document[0];
+	      }
+
+	      // If there is a prefix set in the config lets use that with an appended period for readability
+	      if (prefix.substr(-1) !== '.') {
+	        prefix = !!prefix ? prefix + '.' : '';
+	      }
+	      var deriveQualifiedKey = function(key) {
+	        return prefix + key;
+	      };
+	      // Checks the browser to see if local storage is supported
+	      var browserSupportsLocalStorage = (function () {
+	        try {
+	          var supported = (storageType in $window && $window[storageType] !== null);
+
+	          // When Safari (OS X or iOS) is in private browsing mode, it appears as though localStorage
+	          // is available, but trying to call .setItem throws an exception.
+	          //
+	          // "QUOTA_EXCEEDED_ERR: DOM Exception 22: An attempt was made to add something to storage
+	          // that exceeded the quota."
+	          var key = deriveQualifiedKey('__' + Math.round(Math.random() * 1e7));
+	          if (supported) {
+	            webStorage = $window[storageType];
+	            webStorage.setItem(key, '');
+	            webStorage.removeItem(key);
+	          }
+
+	          return supported;
+	        } catch (e) {
+	          storageType = 'cookie';
+	          $rootScope.$broadcast('LocalStorageModule.notification.error', e.message);
+	          return false;
+	        }
+	      }());
+
+	      // Directly adds a value to local storage
+	      // If local storage is not available in the browser use cookies
+	      // Example use: localStorageService.add('library','angular');
+	      var addToLocalStorage = function (key, value) {
+	        // Let's convert undefined values to null to get the value consistent
+	        if (isUndefined(value)) {
+	          value = null;
+	        } else {
+	          value = toJson(value);
+	        }
+
+	        // If this browser does not support local storage use cookies
+	        if (!browserSupportsLocalStorage || self.storageType === 'cookie') {
+	          if (!browserSupportsLocalStorage) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.warning', 'LOCAL_STORAGE_NOT_SUPPORTED');
+	          }
+
+	          if (notify.setItem) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.setitem', {key: key, newvalue: value, storageType: 'cookie'});
+	          }
+	          return addToCookies(key, value);
+	        }
+
+	        try {
+	          if (webStorage) {
+	            webStorage.setItem(deriveQualifiedKey(key), value);
+	          }
+	          if (notify.setItem) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.setitem', {key: key, newvalue: value, storageType: self.storageType});
+	          }
+	        } catch (e) {
+	          $rootScope.$broadcast('LocalStorageModule.notification.error', e.message);
+	          return addToCookies(key, value);
+	        }
+	        return true;
+	      };
+
+	      // Directly get a value from local storage
+	      // Example use: localStorageService.get('library'); // returns 'angular'
+	      var getFromLocalStorage = function (key) {
+
+	        if (!browserSupportsLocalStorage || self.storageType === 'cookie') {
+	          if (!browserSupportsLocalStorage) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.warning','LOCAL_STORAGE_NOT_SUPPORTED');
+	          }
+
+	          return getFromCookies(key);
+	        }
+
+	        var item = webStorage ? webStorage.getItem(deriveQualifiedKey(key)) : null;
+	        // angular.toJson will convert null to 'null', so a proper conversion is needed
+	        // FIXME not a perfect solution, since a valid 'null' string can't be stored
+	        if (!item || item === 'null') {
+	          return null;
+	        }
+
+	        try {
+	          return JSON.parse(item);
+	        } catch (e) {
+	          return item;
+	        }
+	      };
+
+	      // Remove an item from local storage
+	      // Example use: localStorageService.remove('library'); // removes the key/value pair of library='angular'
+	      var removeFromLocalStorage = function () {
+	        var i, key;
+	        for (i=0; i<arguments.length; i++) {
+	          key = arguments[i];
+	          if (!browserSupportsLocalStorage || self.storageType === 'cookie') {
+	            if (!browserSupportsLocalStorage) {
+	              $rootScope.$broadcast('LocalStorageModule.notification.warning', 'LOCAL_STORAGE_NOT_SUPPORTED');
+	            }
+
+	            if (notify.removeItem) {
+	              $rootScope.$broadcast('LocalStorageModule.notification.removeitem', {key: key, storageType: 'cookie'});
+	            }
+	            removeFromCookies(key);
+	          }
+	          else {
+	            try {
+	              webStorage.removeItem(deriveQualifiedKey(key));
+	              if (notify.removeItem) {
+	                $rootScope.$broadcast('LocalStorageModule.notification.removeitem', {
+	                  key: key,
+	                  storageType: self.storageType
+	                });
+	              }
+	            } catch (e) {
+	              $rootScope.$broadcast('LocalStorageModule.notification.error', e.message);
+	              removeFromCookies(key);
+	            }
+	          }
+	        }
+	      };
+
+	      // Return array of keys for local storage
+	      // Example use: var keys = localStorageService.keys()
+	      var getKeysForLocalStorage = function () {
+
+	        if (!browserSupportsLocalStorage) {
+	          $rootScope.$broadcast('LocalStorageModule.notification.warning', 'LOCAL_STORAGE_NOT_SUPPORTED');
+	          return false;
+	        }
+
+	        var prefixLength = prefix.length;
+	        var keys = [];
+	        for (var key in webStorage) {
+	          // Only return keys that are for this app
+	          if (key.substr(0,prefixLength) === prefix) {
+	            try {
+	              keys.push(key.substr(prefixLength));
+	            } catch (e) {
+	              $rootScope.$broadcast('LocalStorageModule.notification.error', e.Description);
+	              return [];
+	            }
+	          }
+	        }
+	        return keys;
+	      };
+
+	      // Remove all data for this app from local storage
+	      // Also optionally takes a regular expression string and removes the matching key-value pairs
+	      // Example use: localStorageService.clearAll();
+	      // Should be used mostly for development purposes
+	      var clearAllFromLocalStorage = function (regularExpression) {
+
+	        // Setting both regular expressions independently
+	        // Empty strings result in catchall RegExp
+	        var prefixRegex = !!prefix ? new RegExp('^' + prefix) : new RegExp();
+	        var testRegex = !!regularExpression ? new RegExp(regularExpression) : new RegExp();
+
+	        if (!browserSupportsLocalStorage || self.storageType === 'cookie') {
+	          if (!browserSupportsLocalStorage) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.warning', 'LOCAL_STORAGE_NOT_SUPPORTED');
+	          }
+	          return clearAllFromCookies();
+	        }
+
+	        var prefixLength = prefix.length;
+
+	        for (var key in webStorage) {
+	          // Only remove items that are for this app and match the regular expression
+	          if (prefixRegex.test(key) && testRegex.test(key.substr(prefixLength))) {
+	            try {
+	              removeFromLocalStorage(key.substr(prefixLength));
+	            } catch (e) {
+	              $rootScope.$broadcast('LocalStorageModule.notification.error',e.message);
+	              return clearAllFromCookies();
+	            }
+	          }
+	        }
+	        return true;
+	      };
+
+	      // Checks the browser to see if cookies are supported
+	      var browserSupportsCookies = (function() {
+	        try {
+	          return $window.navigator.cookieEnabled ||
+	          ("cookie" in $document && ($document.cookie.length > 0 ||
+	            ($document.cookie = "test").indexOf.call($document.cookie, "test") > -1));
+	          } catch (e) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.error', e.message);
+	            return false;
+	          }
+	        }());
+
+	        // Directly adds a value to cookies
+	        // Typically used as a fallback is local storage is not available in the browser
+	        // Example use: localStorageService.cookie.add('library','angular');
+	        var addToCookies = function (key, value, daysToExpiry) {
+
+	          if (isUndefined(value)) {
+	            return false;
+	          } else if(isArray(value) || isObject(value)) {
+	            value = toJson(value);
+	          }
+
+	          if (!browserSupportsCookies) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.error', 'COOKIES_NOT_SUPPORTED');
+	            return false;
+	          }
+
+	          try {
+	            var expiry = '',
+	            expiryDate = new Date(),
+	            cookieDomain = '';
+
+	            if (value === null) {
+	              // Mark that the cookie has expired one day ago
+	              expiryDate.setTime(expiryDate.getTime() + (-1 * 24 * 60 * 60 * 1000));
+	              expiry = "; expires=" + expiryDate.toGMTString();
+	              value = '';
+	            } else if (isNumber(daysToExpiry) && daysToExpiry !== 0) {
+	              expiryDate.setTime(expiryDate.getTime() + (daysToExpiry * 24 * 60 * 60 * 1000));
+	              expiry = "; expires=" + expiryDate.toGMTString();
+	            } else if (cookie.expiry !== 0) {
+	              expiryDate.setTime(expiryDate.getTime() + (cookie.expiry * 24 * 60 * 60 * 1000));
+	              expiry = "; expires=" + expiryDate.toGMTString();
+	            }
+	            if (!!key) {
+	              var cookiePath = "; path=" + cookie.path;
+	              if(cookie.domain){
+	                cookieDomain = "; domain=" + cookie.domain;
+	              }
+	              $document.cookie = deriveQualifiedKey(key) + "=" + encodeURIComponent(value) + expiry + cookiePath + cookieDomain;
+	            }
+	          } catch (e) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.error',e.message);
+	            return false;
+	          }
+	          return true;
+	        };
+
+	        // Directly get a value from a cookie
+	        // Example use: localStorageService.cookie.get('library'); // returns 'angular'
+	        var getFromCookies = function (key) {
+	          if (!browserSupportsCookies) {
+	            $rootScope.$broadcast('LocalStorageModule.notification.error', 'COOKIES_NOT_SUPPORTED');
+	            return false;
+	          }
+
+	          var cookies = $document.cookie && $document.cookie.split(';') || [];
+	          for(var i=0; i < cookies.length; i++) {
+	            var thisCookie = cookies[i];
+	            while (thisCookie.charAt(0) === ' ') {
+	              thisCookie = thisCookie.substring(1,thisCookie.length);
+	            }
+	            if (thisCookie.indexOf(deriveQualifiedKey(key) + '=') === 0) {
+	              var storedValues = decodeURIComponent(thisCookie.substring(prefix.length + key.length + 1, thisCookie.length));
+	              try {
+	                return JSON.parse(storedValues);
+	              } catch(e) {
+	                return storedValues;
+	              }
+	            }
+	          }
+	          return null;
+	        };
+
+	        var removeFromCookies = function (key) {
+	          addToCookies(key,null);
+	        };
+
+	        var clearAllFromCookies = function () {
+	          var thisCookie = null, thisKey = null;
+	          var prefixLength = prefix.length;
+	          var cookies = $document.cookie.split(';');
+	          for(var i = 0; i < cookies.length; i++) {
+	            thisCookie = cookies[i];
+
+	            while (thisCookie.charAt(0) === ' ') {
+	              thisCookie = thisCookie.substring(1, thisCookie.length);
+	            }
+
+	            var key = thisCookie.substring(prefixLength, thisCookie.indexOf('='));
+	            removeFromCookies(key);
+	          }
+	        };
+
+	        var getStorageType = function() {
+	          return storageType;
+	        };
+
+	        // Add a listener on scope variable to save its changes to local storage
+	        // Return a function which when called cancels binding
+	        var bindToScope = function(scope, key, def, lsKey) {
+	          lsKey = lsKey || key;
+	          var value = getFromLocalStorage(lsKey);
+
+	          if (value === null && isDefined(def)) {
+	            value = def;
+	          } else if (isObject(value) && isObject(def)) {
+	            value = extend(value, def);
+	          }
+
+	          $parse(key).assign(scope, value);
+
+	          return scope.$watch(key, function(newVal) {
+	            addToLocalStorage(lsKey, newVal);
+	          }, isObject(scope[key]));
+	        };
+
+	        // Return localStorageService.length
+	        // ignore keys that not owned
+	        var lengthOfLocalStorage = function() {
+	          var count = 0;
+	          var storage = $window[storageType];
+	          for(var i = 0; i < storage.length; i++) {
+	            if(storage.key(i).indexOf(prefix) === 0 ) {
+	              count++;
+	            }
+	          }
+	          return count;
+	        };
+
+	        return {
+	          isSupported: browserSupportsLocalStorage,
+	          getStorageType: getStorageType,
+	          set: addToLocalStorage,
+	          add: addToLocalStorage, //DEPRECATED
+	          get: getFromLocalStorage,
+	          keys: getKeysForLocalStorage,
+	          remove: removeFromLocalStorage,
+	          clearAll: clearAllFromLocalStorage,
+	          bind: bindToScope,
+	          deriveKey: deriveQualifiedKey,
+	          length: lengthOfLocalStorage,
+	          cookie: {
+	            isSupported: browserSupportsCookies,
+	            set: addToCookies,
+	            add: addToCookies, //DEPRECATED
+	            get: getFromCookies,
+	            remove: removeFromCookies,
+	            clearAll: clearAllFromCookies
+	          }
+	        };
+	      }];
+	  });
+
+
+/***/ },
+
+/***/ 312:
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var load = __webpack_require__(311);
+	var load = __webpack_require__(313);
 
 	load.keys().forEach(load);
 
@@ -36545,11 +37014,11 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 311:
+/***/ 313:
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./routerAnimation.js": 312
+		"./routerAnimation.js": 314
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -36562,21 +37031,21 @@ webpackJsonp([1],{
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 311;
+	webpackContext.id = 313;
 
 
 /***/ },
 
-/***/ 312:
+/***/ 314:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _mAnimations = __webpack_require__(313);
+	var _mAnimations = __webpack_require__(315);
 
 	var _mAnimations2 = _interopRequireDefault(_mAnimations);
 
-	var _gsap = __webpack_require__(317);
+	var _gsap = __webpack_require__(319);
 
 	var _gsap2 = _interopRequireDefault(_gsap);
 
@@ -36612,7 +37081,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 313:
+/***/ 315:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36621,11 +37090,11 @@ webpackJsonp([1],{
 	  value: true
 	});
 
-	var _getModuleInstance = __webpack_require__(314);
+	var _getModuleInstance = __webpack_require__(316);
 
 	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
 
-	var _angularAnimate = __webpack_require__(315);
+	var _angularAnimate = __webpack_require__(317);
 
 	var _angularAnimate2 = _interopRequireDefault(_angularAnimate);
 
@@ -36641,7 +37110,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 314:
+/***/ 316:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36686,16 +37155,16 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 315:
+/***/ 317:
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(316);
+	__webpack_require__(318);
 	module.exports = 'ngAnimate';
 
 
 /***/ },
 
-/***/ 316:
+/***/ 318:
 /***/ function(module, exports) {
 
 	/**
@@ -40823,7 +41292,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 317:
+/***/ 319:
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {/*** IMPORTS FROM imports-loader ***/
@@ -48418,7 +48887,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 318:
+/***/ 320:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48426,7 +48895,7 @@ webpackJsonp([1],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var load = __webpack_require__(319);
+	var load = __webpack_require__(321);
 
 	load.keys().forEach(load);
 
@@ -48434,12 +48903,14 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 319:
+/***/ 321:
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./DetailCtrl.js": 320,
-		"./MyCtrl.js": 322
+		"./MovieCreateCtrl.js": 322,
+		"./MovieEditCtrl.js": 324,
+		"./MovieListCtrl.js": 328,
+		"./MovieViewCtrl.js": 329
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -48452,27 +48923,37 @@ webpackJsonp([1],{
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-	webpackContext.id = 319;
+	webpackContext.id = 321;
 
 
 /***/ },
 
-/***/ 320:
+/***/ 322:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _mCtrls = __webpack_require__(321);
+	var _mCtrls = __webpack_require__(323);
 
 	var _mCtrls2 = _interopRequireDefault(_mCtrls);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-		_mCtrls2.default.controller('DetailCtrl', function () {});
+	_mCtrls2.default.controller('MovieCreateCtrl', ["$scope", "$state", "$stateParams", "MovieService", function ($scope, $state, $stateParams, MovieService) {
+	    $scope.movie = {};
+
+	    $scope.movie.rating = 3;
+
+	    $scope.addMovie = function () {
+	        MovieService.addMovie($scope.movie).then(function () {
+	            $state.go('movies');
+	        });
+	    };
+		}]);
 
 /***/ },
 
-/***/ 321:
+/***/ 323:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48481,7 +48962,7 @@ webpackJsonp([1],{
 	  value: true
 	});
 
-	var _getModuleInstance = __webpack_require__(314);
+	var _getModuleInstance = __webpack_require__(316);
 
 	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
 
@@ -48497,16 +48978,16 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 322:
+/***/ 324:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _mCtrls = __webpack_require__(321);
+	var _mCtrls = __webpack_require__(323);
 
 	var _mCtrls2 = _interopRequireDefault(_mCtrls);
 
-	var _debug = __webpack_require__(323);
+	var _debug = __webpack_require__(325);
 
 	var _debug2 = _interopRequireDefault(_debug);
 
@@ -48518,15 +48999,25 @@ webpackJsonp([1],{
 
 	var log = (0, _debug2.default)('Ctrls');
 
-	_mCtrls2.default.controller('MyCtrl', ["$scope", function ($scope) {
+	_mCtrls2.default.controller('MovieEditCtrl', ["$scope", "$state", "$stateParams", "MovieService", function ($scope, $state, $stateParams, MovieService) {
 	    log('test');
-	    $scope.test = 'test';
+	    $scope.updateMovie = function () {
+	        MovieService.updateMovie($scope.movie, $stateParams.id).then(function () {
+	            $state.go('movies');
+	        });
+	    };
+
+	    $scope.loadMovie = function () {
+	        $scope.movie = MovieService.getMovie($stateParams.id);
+	    };
+
+	    $scope.loadMovie();
 	    console.log(_loader2.default.getLoader('main').getResult('app-data'));
 		}]);
 
 /***/ },
 
-/***/ 323:
+/***/ 325:
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -48536,7 +49027,7 @@ webpackJsonp([1],{
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(324);
+	exports = module.exports = __webpack_require__(326);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -48701,7 +49192,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 324:
+/***/ 326:
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -48717,7 +49208,7 @@ webpackJsonp([1],{
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(325);
+	exports.humanize = __webpack_require__(327);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -48905,7 +49396,7 @@ webpackJsonp([1],{
 
 /***/ },
 
-/***/ 325:
+/***/ 327:
 /***/ function(module, exports) {
 
 	/**
@@ -49034,6 +49525,548 @@ webpackJsonp([1],{
 	  return Math.ceil(ms / n) + ' ' + name + 's';
 	}
 
+
+/***/ },
+
+/***/ 328:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mCtrls = __webpack_require__(323);
+
+	var _mCtrls2 = _interopRequireDefault(_mCtrls);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mCtrls2.default.controller('MovieListCtrl', ["$scope", "$state", "PopupService", "$window", "MovieService", function ($scope, $state, PopupService, $window, MovieService) {
+	    $scope.movies = MovieService.getMovies();
+
+	    $scope.deleteMovie = function (id) {
+	        if (PopupService.showPopup('Really delete this?')) {
+	            MovieService.deleteMovie(id).then(function () {
+	                $window.location.href = '';
+	            });
+	        }
+	    };
+		}]);
+
+/***/ },
+
+/***/ 329:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mCtrls = __webpack_require__(323);
+
+	var _mCtrls2 = _interopRequireDefault(_mCtrls);
+
+	var _debug = __webpack_require__(325);
+
+	var _debug2 = _interopRequireDefault(_debug);
+
+	var _loader = __webpack_require__(291);
+
+	var _loader2 = _interopRequireDefault(_loader);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var log = (0, _debug2.default)('Ctrls');
+
+	_mCtrls2.default.controller('MovieViewCtrl', ["$scope", "$stateParams", "MovieService", function ($scope, $stateParams, MovieService) {
+	    log('test');
+	    $scope.movie = MovieService.getMovie($stateParams.id);
+	    console.log(_loader2.default.getLoader('main').getResult('app-data'));
+		}]);
+
+/***/ },
+
+/***/ 330:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var load = __webpack_require__(331);
+
+	load.keys().forEach(load);
+
+		exports.default = 'mDirectives';
+
+/***/ },
+
+/***/ 331:
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./RatingStarDirective.js": 332
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 331;
+
+
+/***/ },
+
+/***/ 332:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mDirectives = __webpack_require__(333);
+
+	var _mDirectives2 = _interopRequireDefault(_mDirectives);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mDirectives2.default.directive('starRating', function () {
+	    return {
+	        restrict: 'EA',
+	        template: '<ul class="star-rating" ng-class="{readonly: readonly}">' + '  <li ng-repeat="star in stars" class="star" ng-class="{filled: star.filled}" ng-click="toggle($index)">' + '    <i class="fa fa-star"></i>' + // or &#9733
+	        '  </li>' + '</ul>',
+	        scope: {
+	            ratingValue: '=ngModel',
+	            max: '=?', // optional (default is 5)
+	            onRatingSelect: '&?',
+	            readonly: '=?'
+	        },
+	        link: function link(scope) {
+	            if (scope.max === undefined) {
+	                scope.max = 5;
+	            }
+	            function updateStars() {
+	                scope.stars = [];
+	                for (var i = 0; i < scope.max; i++) {
+	                    scope.stars.push({
+	                        filled: i < scope.ratingValue
+	                    });
+	                }
+	            }
+	            scope.toggle = function (index) {
+	                if (scope.readonly === undefined || scope.readonly === false) {
+	                    scope.ratingValue = index + 1;
+	                    scope.onRatingSelect({
+	                        rating: index + 1
+	                    });
+	                }
+	            };
+	            scope.$watch('ratingValue', function (oldValue, newValue) {
+	                if (newValue) {
+	                    updateStars();
+	                }
+	            });
+	        }
+	    };
+		});
+
+/***/ },
+
+/***/ 333:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _getModuleInstance = __webpack_require__(316);
+
+	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * Create directives module
+	 */
+
+	var mDirectives = (0, _getModuleInstance2.default)('mDirectives');
+
+		exports.default = mDirectives;
+
+/***/ },
+
+/***/ 334:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var load = __webpack_require__(335);
+
+	load.keys().forEach(load);
+
+		exports.default = 'mServices';
+
+/***/ },
+
+/***/ 335:
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./ApiService.js": 336,
+		"./MovieService.js": 339,
+		"./PopupService.js": 340
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 335;
+
+
+/***/ },
+
+/***/ 336:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mServices = __webpack_require__(337);
+
+	var _mServices2 = _interopRequireDefault(_mServices);
+
+	var _cuid = __webpack_require__(338);
+
+	var _cuid2 = _interopRequireDefault(_cuid);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mServices2.default.service('ApiService', ["$http", "localStorageService", "$q", function ($http, localStorageService, $q) {
+	    var FIREBASE_URL = 'https://inmotion-challange.firebaseio.com/';
+	    var deferred = $q.defer();
+
+	    this.firebase = {
+	        /*
+	            example firebase response:
+	         {
+	             "-KC8jCGBUzMIFFoKx3Vz": {
+	                 "actors": ["Keanu Reeves","Laurence Fishburne","Carrie-Anne Moss"],
+	                 "genre": "Sci-Fi",
+	                 "rating": 5,
+	                 "title": "The Matrix",
+	                 "year": 1999
+	             },
+	             "-KC8jmyVQ5rH4JOMfHSS": {
+	                 "actors": ["Gerard Butler","Brenton Thwaites"],
+	                 "genre": "Fantasy/Action",
+	                 "rating": 5,
+	                 "title": "Gods of Egypt",
+	                 "year": 2016
+	             }
+	         }
+	         */
+	        findAll: function findAll() {
+	            return $http.get(FIREBASE_URL + '/movies.json');
+	        },
+	        /*
+	         example firebase response:
+	        "-KC8jmyVQ5rH4JOMfHSS": {
+	            "actors": ["Gerard Butler","Brenton Thwaites"],
+	            "genre": "Fantasy/Action",
+	            "rating": 5,
+	            "title": "Gods of Egypt",
+	            "year": 2016
+	        }
+	        */
+	        find: function find(id) {
+	            return $http.get(FIREBASE_URL + '/movies/:id.json', {
+	                params: { id: id }
+	            });
+	        },
+	        /*
+	        movie object should be formatted for firebase like this:
+	         {
+	             "actors": ["Gerard Butler","Brenton Thwaites"],
+	             "genre": "Fantasy/Action",
+	             "rating": 5,
+	             "title": "Gods of Egypt",
+	             "year": 2016
+	         }
+	         firebase adds push IDs:
+	         */
+	        add: function add(movie) {
+	            return $http.post(FIREBASE_URL + '/movies.json', {
+	                data: movie
+	            });
+	        },
+	        update: function update(movie, id) {
+	            return $http.put(FIREBASE_URL + '/movies/:id.json', {
+	                data: movie,
+	                params: { id: id }
+	            });
+	        },
+	        remove: function remove(id) {
+	            return $http.delete(FIREBASE_URL + '/movies/:id.json', {
+	                params: { id: id }
+	            });
+	        }
+	    };
+	    this.localStorage = {
+	        findAll: function findAll() {
+	            setTimeout(function () {
+	                deferred.notify('getting movies');
+	                var movies = localStorageService.keys().map(function (key) {
+	                    return JSON.parse(localStorageService.get(key));
+	                });
+
+	                if (movies) {
+	                    deferred.resolve(movies);
+	                } else {
+	                    deferred.reject('There was a problem loading the movies');
+	                }
+	            }, 10);
+
+	            return deferred.promise;
+	        },
+	        find: function find(id) {
+	            return JSON.parse(localStorageService.get(id));
+	        },
+	        add: function add(movie) {
+	            setTimeout(function () {
+	                deferred.notify('adding movie');
+	                deferred.resolve(localStorageService.set((0, _cuid2.default)(), JSON.stringify(movie)));
+	            }, 10);
+
+	            return deferred.promise;
+	        },
+	        update: function update(movie, id) {
+	            localStorageService.remove(id);
+	            setTimeout(function () {
+	                deferred.notify('updating movie');
+	                deferred.resolve(localStorageService.set(id, JSON.stringify(movie)));
+	            }, 10);
+
+	            return deferred.promise;
+	        },
+	        remove: function remove(id) {
+	            localStorageService.remove(id);
+	            setTimeout(function () {
+	                deferred.notify('deleting movie');
+	                deferred.resolve(localStorageService.remove(id));
+	            }, 10);
+
+	            return deferred.promise;
+	        }
+	    };
+		}]);
+
+/***/ },
+
+/***/ 337:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _getModuleInstance = __webpack_require__(316);
+
+	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * Create services module
+	 */
+
+	var mServices = (0, _getModuleInstance2.default)('mServices');
+
+		exports.default = mServices;
+
+/***/ },
+
+/***/ 338:
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * cuid.js
+	 * Collision-resistant UID generator for browsers and node.
+	 * Sequential for fast db lookups and recency sorting.
+	 * Safe for element IDs and server-side lookups.
+	 *
+	 * Extracted from CLCTR
+	 *
+	 * Copyright (c) Eric Elliott 2012
+	 * MIT License
+	 */
+
+	/*global window, navigator, document, require, process, module */
+	(function (app) {
+	  'use strict';
+	  var namespace = 'cuid',
+	    c = 0,
+	    blockSize = 4,
+	    base = 36,
+	    discreteValues = Math.pow(base, blockSize),
+
+	    pad = function pad(num, size) {
+	      var s = "000000000" + num;
+	      return s.substr(s.length-size);
+	    },
+
+	    randomBlock = function randomBlock() {
+	      return pad((Math.random() *
+	            discreteValues << 0)
+	            .toString(base), blockSize);
+	    },
+
+	    safeCounter = function () {
+	      c = (c < discreteValues) ? c : 0;
+	      c++; // this is not subliminal
+	      return c - 1;
+	    },
+
+	    api = function cuid() {
+	      // Starting with a lowercase letter makes
+	      // it HTML element ID friendly.
+	      var letter = 'c', // hard-coded allows for sequential access
+
+	        // timestamp
+	        // warning: this exposes the exact date and time
+	        // that the uid was created.
+	        timestamp = (new Date().getTime()).toString(base),
+
+	        // Prevent same-machine collisions.
+	        counter,
+
+	        // A few chars to generate distinct ids for different
+	        // clients (so different computers are far less
+	        // likely to generate the same id)
+	        fingerprint = api.fingerprint(),
+
+	        // Grab some more chars from Math.random()
+	        random = randomBlock() + randomBlock();
+
+	        counter = pad(safeCounter().toString(base), blockSize);
+
+	      return  (letter + timestamp + counter + fingerprint + random);
+	    };
+
+	  api.slug = function slug() {
+	    var date = new Date().getTime().toString(36),
+	      counter,
+	      print = api.fingerprint().slice(0,1) +
+	        api.fingerprint().slice(-1),
+	      random = randomBlock().slice(-2);
+
+	      counter = safeCounter().toString(36).slice(-4);
+
+	    return date.slice(-2) +
+	      counter + print + random;
+	  };
+
+	  api.globalCount = function globalCount() {
+	    // We want to cache the results of this
+	    var cache = (function calc() {
+	        var i,
+	          count = 0;
+
+	        for (i in window) {
+	          count++;
+	        }
+
+	        return count;
+	      }());
+
+	    api.globalCount = function () { return cache; };
+	    return cache;
+	  };
+
+	  api.fingerprint = function browserPrint() {
+	    return pad((navigator.mimeTypes.length +
+	      navigator.userAgent.length).toString(36) +
+	      api.globalCount().toString(36), 4);
+	  };
+
+	  // don't change anything from here down.
+	  if (app.register) {
+	    app.register(namespace, api);
+	  } else if (true) {
+	    module.exports = api;
+	  } else {
+	    app[namespace] = api;
+	  }
+
+	}(this.applitude || this));
+
+
+/***/ },
+
+/***/ 339:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mServices = __webpack_require__(337);
+
+	var _mServices2 = _interopRequireDefault(_mServices);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mServices2.default.service('MovieService', ["ApiService", "API", function (ApiService, API) {
+	    this.getMovies = function () {
+	        ApiService[API].findAll();
+	    };
+
+	    this.getMovie = function (id) {
+	        ApiService[API].find(id);
+	    };
+
+	    this.addMovie = function (movie) {
+	        return ApiService[API].add(movie);
+	    };
+
+	    this.updateMovie = function (id) {
+	        ApiService[API].update(id);
+	    };
+
+	    this.deleteMovie = function (id) {
+	        ApiService[API].remove(id);
+	    };
+		}]);
+
+/***/ },
+
+/***/ 340:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mServices = __webpack_require__(337);
+
+	var _mServices2 = _interopRequireDefault(_mServices);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mServices2.default.service('PopupService', ["$window", function ($window) {
+	    this.showPopup = function (message) {
+	        return $window.confirm(message);
+	    };
+		}]);
 
 /***/ }
 

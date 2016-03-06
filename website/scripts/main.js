@@ -150,7 +150,7 @@
 	        (0, _jquery2.default)('.loader').hide();
 
 	        // run app
-	        angular.bootstrap(document, ['mApp'], { strictDi: true });
+	        angular.bootstrap(document, ['movieApp'], { strictDi: true });
 	    });
 	}
 
