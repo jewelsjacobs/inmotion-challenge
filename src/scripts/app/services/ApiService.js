@@ -87,10 +87,27 @@ mServices.service('ApiService', function ($http, localStorageService, $q) {
         findAll: () => {
             setTimeout(() => {
                 deferred.notify('getting movies');
-                const movies =  localStorageService.keys().map((key) => {
-                    return JSON.parse(localStorageService.get(key));
-                });
+                let movies;
 
+                if (typeof localStorageService.keys() === 'string'
+                    && typeof JSON.parse(localStorageService.get(localStorageService.keys())).edited !== 'undefined') {
+                    movies = Object.assign(
+                        {
+                            [localStorageService.keys()]: JSON.parse(localStorageService.get(localStorageService.keys()))
+                        }
+                    );
+                } else if (Array.isArray(localStorageService.keys())) {
+                    localStorageService.keys().forEach((key) => {
+                         if (typeof JSON.parse(localStorageService.get(key)).edited !== 'undefined') {
+                            movies = Object.assign(
+                                {
+                                    [key]: JSON.parse(localStorageService.get(key))
+                                }
+                            );
+                        }
+                    });
+                }
+                console.log(movies, localStorageService.keys());
                 if (movies) {
                     deferred.resolve(movies);
                 } else {
@@ -101,7 +118,12 @@ mServices.service('ApiService', function ($http, localStorageService, $q) {
             return deferred.promise;
         },
         find: (id) => {
-            return JSON.parse(localStorageService.get(id));
+            setTimeout(() => {
+                deferred.notify('finding movie');
+                deferred.resolve(JSON.parse(localStorageService.get(id)));
+            }, 10);
+
+            return deferred.promise;
         },
         add: (movie) => {
             setTimeout(() => {

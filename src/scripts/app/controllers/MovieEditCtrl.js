@@ -7,13 +7,16 @@ var log = debug('Ctrls');
 mCtrls.controller('MovieEditCtrl', ($scope, $state, $stateParams, MovieService) => {
     log('test');
     $scope.updateMovie = function () {
+        $scope.movie.edited = Date.now();
         MovieService.updateMovie($scope.movie, $stateParams.id).then(() => {
             $state.go('movies');
         });
     };
 
     $scope.loadMovie = function () {
-        $scope.movie = MovieService.getMovie($stateParams.id);
+        MovieService.getMovie($stateParams.id).then((movie) => {
+            $scope.movie = movie;
+        });
     };
 
     $scope.loadMovie();

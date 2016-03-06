@@ -49002,13 +49002,16 @@ webpackJsonp([1],{
 	_mCtrls2.default.controller('MovieEditCtrl', ["$scope", "$state", "$stateParams", "MovieService", function ($scope, $state, $stateParams, MovieService) {
 	    log('test');
 	    $scope.updateMovie = function () {
+	        $scope.movie.edited = Date.now();
 	        MovieService.updateMovie($scope.movie, $stateParams.id).then(function () {
 	            $state.go('movies');
 	        });
 	    };
 
 	    $scope.loadMovie = function () {
-	        $scope.movie = MovieService.getMovie($stateParams.id);
+	        MovieService.getMovie($stateParams.id).then(function (movie) {
+	            $scope.movie = movie;
+	        });
 	    };
 
 	    $scope.loadMovie();
@@ -49540,7 +49543,9 @@ webpackJsonp([1],{
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_mCtrls2.default.controller('MovieListCtrl', ["$scope", "$state", "PopupService", "$window", "MovieService", function ($scope, $state, PopupService, $window, MovieService) {
-	    $scope.movies = MovieService.getMovies();
+	    MovieService.getMovies().then(function (movies) {
+	        $scope.movies = movies;
+	    });
 
 	    $scope.deleteMovie = function (id) {
 	        if (PopupService.showPopup('Really delete this?')) {
@@ -49562,22 +49567,13 @@ webpackJsonp([1],{
 
 	var _mCtrls2 = _interopRequireDefault(_mCtrls);
 
-	var _debug = __webpack_require__(325);
-
-	var _debug2 = _interopRequireDefault(_debug);
-
-	var _loader = __webpack_require__(291);
-
-	var _loader2 = _interopRequireDefault(_loader);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var log = (0, _debug2.default)('Ctrls');
-
-	_mCtrls2.default.controller('MovieViewCtrl', ["$scope", "$stateParams", "MovieService", function ($scope, $stateParams, MovieService) {
-	    log('test');
-	    $scope.movie = MovieService.getMovie($stateParams.id);
-	    console.log(_loader2.default.getLoader('main').getResult('app-data'));
+	_mCtrls2.default.controller('MovieViewCtrl', ["$scope", "$state", "$stateParams", "MovieService", function ($scope, $state, $stateParams, MovieService) {
+	    MovieService.getMovie($stateParams.id).then(function (movie) {
+	        $scope.movie = movie;
+	        $scope.movie._id = $stateParams.id;
+	    });
 		}]);
 
 /***/ },
@@ -49753,6 +49749,8 @@ webpackJsonp([1],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	_mServices2.default.service('ApiService', ["$http", "localStorageService", "$q", function ($http, localStorageService, $q) {
 	    var FIREBASE_URL = 'https://inmotion-challange.firebaseio.com/';
 	    var deferred = $q.defer();
@@ -49827,10 +49825,18 @@ webpackJsonp([1],{
 	        findAll: function findAll() {
 	            setTimeout(function () {
 	                deferred.notify('getting movies');
-	                var movies = localStorageService.keys().map(function (key) {
-	                    return JSON.parse(localStorageService.get(key));
-	                });
+	                var movies = void 0;
 
+	                if (typeof localStorageService.keys() === 'string' && typeof JSON.parse(localStorageService.get(localStorageService.keys())).edited !== 'undefined') {
+	                    movies = Object.assign(_defineProperty({}, localStorageService.keys(), JSON.parse(localStorageService.get(localStorageService.keys()))));
+	                } else if (Array.isArray(localStorageService.keys())) {
+	                    localStorageService.keys().forEach(function (key) {
+	                        if (typeof JSON.parse(localStorageService.get(key)).edited !== 'undefined') {
+	                            movies = Object.assign(_defineProperty({}, key, JSON.parse(localStorageService.get(key))));
+	                        }
+	                    });
+	                }
+	                console.log(movies, localStorageService.keys());
 	                if (movies) {
 	                    deferred.resolve(movies);
 	                } else {
@@ -49841,7 +49847,12 @@ webpackJsonp([1],{
 	            return deferred.promise;
 	        },
 	        find: function find(id) {
-	            return JSON.parse(localStorageService.get(id));
+	            setTimeout(function () {
+	                deferred.notify('finding movie');
+	                deferred.resolve(JSON.parse(localStorageService.get(id)));
+	            }, 10);
+
+	            return deferred.promise;
 	        },
 	        add: function add(movie) {
 	            setTimeout(function () {
@@ -50029,23 +50040,23 @@ webpackJsonp([1],{
 
 	_mServices2.default.service('MovieService', ["ApiService", "API", function (ApiService, API) {
 	    this.getMovies = function () {
-	        ApiService[API].findAll();
+	        return ApiService[API].findAll();
 	    };
 
 	    this.getMovie = function (id) {
-	        ApiService[API].find(id);
+	        return ApiService[API].find(id);
 	    };
 
 	    this.addMovie = function (movie) {
 	        return ApiService[API].add(movie);
 	    };
 
-	    this.updateMovie = function (id) {
-	        ApiService[API].update(id);
+	    this.updateMovie = function (movie, id) {
+	        return ApiService[API].update(movie, id);
 	    };
 
 	    this.deleteMovie = function (id) {
-	        ApiService[API].remove(id);
+	        return ApiService[API].remove(id);
 	    };
 		}]);
 

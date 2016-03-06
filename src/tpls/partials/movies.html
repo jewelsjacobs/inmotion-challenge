@@ -4,11 +4,11 @@
         <td><h3>All Movies</h3></td>
         <td></td>
     </tr>
-    <tr ng-repeat="(id, movie) in movies">
+    <tr ng-repeat="movie in movies">
         <td>{{movie.title}}</td>
         <td>
-            <a class="btn btn-primary" ui-sref="viewMovie(id)">View</a>
-            <a class="btn btn-danger"  ng-click="deleteMovie(movie)">Delete</a>
+            <a class="btn btn-primary" ui-sref="viewMovie({id:movie._id})">View</a>
+            <a class="btn btn-danger"  ng-click="deleteMovie(movie._id)">Delete</a>
         </td>
     </tr>
 </table>

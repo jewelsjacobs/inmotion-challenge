@@ -2,22 +2,22 @@ import mServices from './_mServices';
 
 mServices.service('MovieService', function (ApiService, API) {
     this.getMovies = () => {
-        ApiService[API].findAll();
+        return ApiService[API].findAll();
     };
 
     this.getMovie = (id) => {
-        ApiService[API].find(id);
+        return ApiService[API].find(id);
     };
 
     this.addMovie = (movie) => {
         return ApiService[API].add(movie);
     };
 
-    this.updateMovie = (id) => {
-        ApiService[API].update(id);
+    this.updateMovie = (movie, id) => {
+        return ApiService[API].update(movie, id);
     };
 
     this.deleteMovie = (id) => {
-        ApiService[API].remove(id);
+        return ApiService[API].remove(id);
     };
 });
