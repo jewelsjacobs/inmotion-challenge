@@ -83,6 +83,7 @@
   "scripts": {
     "install": "if [ \"$NODE_ENV\" == \"development\" ]; then napa CreateJS/PreloadJS#0.6.2:PreloadJS; fi",
     "build": "NODE_ENV=production npm install --production",
+    "build-dev": "NODE_ENV=development npm install",
     "app": "node server.js"
   },
   "main": "server.js"

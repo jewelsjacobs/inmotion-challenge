@@ -7,6 +7,7 @@ var expect = chai.expect;
 
 'use strict';
 
+/*
 describe('HOME PAGE', function () {
     it('should wrap webdriver', function () {
         // Mocha will report the spec as slow if it goes over this time in ms.
@@ -15,3 +16,4 @@ describe('HOME PAGE', function () {
         expect(browser.getTitle()).to.eventually.equal('The Movie App');
     });
 });
+*/

@@ -1,5 +1,6 @@
 /* globals inject */
 
+/*
 import angular from 'angular';
 import mCtrls from '../../src/scripts/app/controllers/_loader';
 import loader from '../../src/scripts/utilities/loader';
@@ -15,7 +16,7 @@ describe('Controllers', function () {
 
         beforeEach(inject(function ($rootScope, $controller) {
             $scope = $rootScope.$new();
-            $controller('MyCtrl', { $scope: $scope });
+            $controller('MovieViewCtrl', { $scope: $scope });
         }));
 
         it('Placeholder', function () {
@@ -24,3 +25,5 @@ describe('Controllers', function () {
 
     });
 });
+
+*/
