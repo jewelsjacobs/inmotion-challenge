@@ -34,18 +34,21 @@ which by default can only accept an array
 
 ## Challenge requirements satisfied
 - Movie CRUD operations with requested fields
-- Abstracted functionality for both localStorage and $http REST service. Example shows working integration with firebase - to view
-    make following modification in _line 47_ `src/scripts/app/movieApp.js` _line 47_:
+- Abstracted functionality for both localStorage and $http REST service. Example shows working integration with firebase
+    - to view make following modification in _line 47_ `src/scripts/app/movieApp.js`:
 
-    ```
-     .constant('API', 'firebase');
-    ```
-    and then run locally:
+        ```
+        // .constant('API', 'localStorage');
+        .constant('API', 'firebase');
+        ```
 
-    ```
-    $ npm run build-dev
-    $ gulp
-    ```
+        and then run locally:
+
+        ```
+        $ npm run build-dev
+        $ gulp
+        ```
+
 - Used AngularJS with MVC architecture
 - Has Movie search
 - Has at least one Service, Controller, Directive and Filter (filter is inline for search)
