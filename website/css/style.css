@@ -5826,4 +5826,7 @@ canvas {
   .star-rating.readonly .star.filled {
     color: #666; }
 
+.newMovie {
+  margin-top: 10px; }
+
 /*# sourceMappingURL=style.css.map */

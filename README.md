@@ -1,3 +1,5 @@
+# [InMotion Movie App Coding Challenge](./CHALLANGE.md)
+
 # Angular with Webpack
 Project was generated with Yeoman generator
 [generator-angular-webpack](https://www.npmjs.com/package/generator-angular-webpack)
@@ -85,7 +87,7 @@ gulp bump --patch : bump patch version
 - List of available values: [show](https://github.com/ai/browserslist#queries)
 
 # Config file 'config.json'
-```        
+```
 root             : List of files to copy to website root folder
 scssIncludePaths : Array of sass libraries
 cssVendor        : Array of css libraries installed with npm

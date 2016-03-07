@@ -1,14 +1,26 @@
-<a ui-sref="newMovie" class="btn btn-primary btn-lg">Add New Movie</a>
 <table class="table">
     <tr>
-        <td><h3>All Movies</h3></td>
+        <td><h2>Movies</h2></td>
+        <td>
+            <a ui-sref="newMovie" class="btn btn-primary btn-lg newMovie">Add New Movie</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="search">Search</label>
+                    <input type="text" ng-model="search" class="form-control" id="search" placeholder="Movie Title">
+                </div>
+            </form>
+        </td>
         <td></td>
     </tr>
-    <tr ng-repeat="(id, movie) in movies">
+    <tr ng-repeat="movie in movies | toArray | filter:search">
         <td>{{movie.title}}</td>
         <td>
-            <a class="btn btn-primary" ui-sref="viewMovie({id: id})">View</a>
-            <a class="btn btn-danger"  ng-click="deleteMovie(id)">Delete</a>
+            <a class="btn btn-primary" ui-sref="viewMovie({id: movie.$key})">View</a>
+            <a class="btn btn-danger"  ng-click="deleteMovie(movie.$key)">Delete</a>
         </td>
     </tr>
 </table>

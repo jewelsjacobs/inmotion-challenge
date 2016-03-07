@@ -54,6 +54,7 @@
     "angular-mocks": "^1.5.0",
     "angular-resource": "^1.5.0",
     "angular-sanitize": "^1.5.0",
+    "angular-toarrayfilter": "^1.0.1",
     "angular-touch": "^1.5.0",
     "angular-ui-router": "^0.2.18",
     "babel-polyfill": "^6.5.0",

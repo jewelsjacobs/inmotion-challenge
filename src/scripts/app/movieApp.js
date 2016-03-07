@@ -7,11 +7,12 @@ import mAnimations from './animations/_loader';
 import mCtrls from './controllers/_loader';
 import mDirectives from './directives/_loader';
 import mServices from './services/_loader';
+require('angular-toArrayFilter');
 
 /**
  * Register main angular app
  */
-angular.module('movieApp', [ngTouch, ngSanitize, uiRouter,
+angular.module('movieApp', [ngTouch, 'angular-toArrayFilter', ngSanitize, uiRouter,
     LocalStorageModule, mAnimations, mCtrls, mDirectives, mServices])
     .config(($stateProvider, $locationProvider, localStorageServiceProvider, $urlRouterProvider) => {
         'ngInject';

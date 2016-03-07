@@ -30486,10 +30486,12 @@ webpackJsonp([1],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	__webpack_require__(339);
+
 	/**
 	 * Register main angular app
 	 */
-	_angular2.default.module('movieApp', [_angularTouch2.default, _angularSanitize2.default, _angularUiRouter2.default, _angularLocalStorage2.default, _loader2.default, _loader4.default, _loader6.default, _loader8.default]).config(["$stateProvider", "$locationProvider", "localStorageServiceProvider", "$urlRouterProvider", function ($stateProvider, $locationProvider, localStorageServiceProvider, $urlRouterProvider) {
+	_angular2.default.module('movieApp', [_angularTouch2.default, 'angular-toArrayFilter', _angularSanitize2.default, _angularUiRouter2.default, _angularLocalStorage2.default, _loader2.default, _loader4.default, _loader6.default, _loader8.default]).config(["$stateProvider", "$locationProvider", "localStorageServiceProvider", "$urlRouterProvider", function ($stateProvider, $locationProvider, localStorageServiceProvider, $urlRouterProvider) {
 	    'ngInject';
 
 	    $stateProvider.state('movies', {
@@ -64669,6 +64671,31 @@ webpackJsonp([1],{
 	        return $window.confirm(message);
 	    };
 		}]);
+
+/***/ },
+
+/***/ 339:
+/***/ function(module, exports) {
+
+	angular.module('angular-toArrayFilter', [])
+
+	.filter('toArray', function () {
+	  return function (obj, addKey) {
+	    if (!angular.isObject(obj)) return obj;
+	    if ( addKey === false ) {
+	      return Object.keys(obj).map(function(key) {
+	        return obj[key];
+	      });
+	    } else {
+	      return Object.keys(obj).map(function (key) {
+	        var value = obj[key];
+	        return angular.isObject(value) ?
+	          Object.defineProperty(value, '$key', { enumerable: false, value: key}) :
+	          { $key: key, $value: value };
+	      });
+	    }
+	  };
+	});
 
 /***/ }
 
