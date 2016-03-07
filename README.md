@@ -1,4 +1,4 @@
-# [InMotion Movie App Coding Challenge](./CHALLANGE.md)
+# [InMotion Movie App Coding Challenge](./CHALLENGE.md)
 
 # Demo
 Hosted on modulus: http://movieapp-59944.onmodulus.net/
