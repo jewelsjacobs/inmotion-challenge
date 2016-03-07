@@ -34,8 +34,8 @@ which by default can only accept an array
 
 ## Challenge requirements satisfied
 - Movie CRUD operations with requested fields
-- Abstracted functionality for both localStorage and $http REST service. Example shows working integration with firebase
-    - to view make following modification in _line 47_ `src/scripts/app/movieApp.js`:
+- Abstracted functionality for both localStorage and a REST service. Example shows working integration with [Firebase REST API](https://www.firebase.com/docs/rest/api/)
+    - View by making the following modification in _line 47_ `src/scripts/app/movieApp.js`:
 
         ```
         // .constant('API', 'localStorage');
