@@ -3,85 +3,22 @@ import cuid from 'cuid';
 import _ from 'lodash';
 
 mServices.service('ApiService', function ($http, localStorageService, $q) {
-    const FIREBASE_URL = 'https://inmotion-challange.firebaseio.com/';
+    const FIREBASE_URL = 'https://inmotion-challange.firebaseio.com';
 
     this.firebase = {
-        /*
-            example firebase response:
-         {
-             "-KC8jCGBUzMIFFoKx3Vz": {
-                 "actors": ["Keanu Reeves","Laurence Fishburne","Carrie-Anne Moss"],
-                 "genre": "Sci-Fi",
-                 "rating": 5,
-                 "title": "The Matrix",
-                 "year": 1999
-             },
-             "-KC8jmyVQ5rH4JOMfHSS": {
-                 "actors": ["Gerard Butler","Brenton Thwaites"],
-                 "genre": "Fantasy/Action",
-                 "rating": 5,
-                 "title": "Gods of Egypt",
-                 "year": 2016
-             }
-         }
-         */
         findAll: () => {
-            return $http.get(`${FIREBASE_URL}/movies.json`);
+            return $http.get(`${FIREBASE_URL}/movies.json`).then((movies) => {
+                return movies.data;
+            });
         },
-        /*
-         example firebase response:
-        "-KC8jmyVQ5rH4JOMfHSS": {
-            "actors": ["Gerard Butler","Brenton Thwaites"],
-            "genre": "Fantasy/Action",
-            "rating": 5,
-            "title": "Gods of Egypt",
-            "year": 2016
-        }
-        */
         find: (id) => {
-            return $http.get(
-                `${FIREBASE_URL}/movies/:id.json`,
-                {
-                    params: { id: id }
-                }
-            );
+            return $http.get(`${FIREBASE_URL}/movies/${id}.json`).then((movie) => {
+                return movie.data;
+            });
         },
-        /*
-        movie object should be formatted for firebase like this:
-         {
-             "actors": ["Gerard Butler","Brenton Thwaites"],
-             "genre": "Fantasy/Action",
-             "rating": 5,
-             "title": "Gods of Egypt",
-             "year": 2016
-         }
-         firebase adds push IDs:
-         */
-        add: (movie) => {
-            return $http.post(
-                `${FIREBASE_URL}/movies.json`,
-                {
-                    data: movie
-                }
-            );
-        },
-        update: (movie, id) => {
-            return $http.put(
-                `${FIREBASE_URL}/movies/:id.json`,
-                {
-                    data: movie,
-                    params: { id: id }
-                }
-            );
-        },
-        remove: (id) => {
-            return $http.delete(
-                `${FIREBASE_URL}/movies/:id.json`,
-                {
-                    params: { id: id }
-                }
-            );
-        }
+        add: (movie) => $http.post(`${FIREBASE_URL}/movies.json`, movie),
+        update: (movie, id) => $http.put(`${FIREBASE_URL}/movies/${id}.json`, movie),
+        remove: (id) => $http.delete(`${FIREBASE_URL}/movies/${id}.json`)
     };
     this.localStorage = {
         findAll: () => {
