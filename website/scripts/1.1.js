@@ -30476,7 +30476,7 @@ webpackJsonp([1],{
 
 	var _loader4 = _interopRequireDefault(_loader3);
 
-	var _loader5 = __webpack_require__(327);
+	var _loader5 = __webpack_require__(328);
 
 	var _loader6 = _interopRequireDefault(_loader5);
 
@@ -48990,8 +48990,12 @@ webpackJsonp([1],{
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_mCtrls2.default.controller('MovieEditCtrl', ["$scope", "$state", "$stateParams", "MovieService", function ($scope, $state, $stateParams, MovieService) {
+	    $scope.movie = {};
+
+	    $scope.movie.rating = 3;
+
 	    MovieService.getMovie($stateParams.id).then(function (movie) {
-	        console.log(movie);
+	        $scope.movie.rating = movie.rating;
 	        $scope.movie = movie;
 	    });
 
@@ -49040,7 +49044,7 @@ webpackJsonp([1],{
 
 	var _mCtrls2 = _interopRequireDefault(_mCtrls);
 
-	var _lodash = __webpack_require__(331);
+	var _lodash = __webpack_require__(327);
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
@@ -49060,125 +49064,6 @@ webpackJsonp([1],{
 /***/ },
 
 /***/ 327:
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var load = __webpack_require__(328);
-
-	load.keys().forEach(load);
-
-		exports.default = 'mDirectives';
-
-/***/ },
-
-/***/ 328:
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./RatingStarDirective.js": 329
-	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 328;
-
-
-/***/ },
-
-/***/ 329:
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _mDirectives = __webpack_require__(330);
-
-	var _mDirectives2 = _interopRequireDefault(_mDirectives);
-
-	var _lodash = __webpack_require__(331);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	_mDirectives2.default.directive('starRating', function () {
-	    return {
-	        restrict: 'EA',
-	        template: '<ul class="star-rating" ng-class="{readonly: readonly}">' + '  <li ng-repeat="star in stars" class="star" ng-class="{filled: star.filled}" ng-click="toggle($index)">' + '    <i class="fa fa-star"></i>' + // or &#9733
-	        '  </li>' + '</ul>',
-	        scope: {
-	            ratingValue: '=ngModel',
-	            max: '=?', // optional (default is 5)
-	            onRatingSelect: '&?',
-	            readonly: '=?'
-	        },
-	        link: function link(scope) {
-	            if (_lodash2.default.isUndefined(scope.max)) {
-	                scope.max = 5;
-	            }
-	            function updateStars() {
-	                scope.stars = _lodash2.default.map(Array(scope.max), function (value, ix) {
-	                    return { filled: ix < scope.ratingValue };
-	                });
-	            }
-	            scope.toggle = function (index) {
-	                if (_lodash2.default.isUndefined(scope.readonly) || scope.readonly === false) {
-	                    scope.ratingValue = index + 1;
-	                    if (_lodash2.default.isFunction(scope.onRatingSelect)) {
-	                        scope.onRatingSelect({
-	                            rating: index + 1
-	                        });
-	                    }
-	                }
-	            };
-	            scope.$watch('ratingValue', function (oldValue, newValue) {
-	                if (newValue) {
-	                    updateStars();
-	                }
-	            });
-	        }
-	    };
-		});
-
-/***/ },
-
-/***/ 330:
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _getModuleInstance = __webpack_require__(316);
-
-	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * Create directives module
-	 */
-
-	var mDirectives = (0, _getModuleInstance2.default)('mDirectives');
-
-		exports.default = mDirectives;
-
-/***/ },
-
-/***/ 331:
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/**
@@ -64259,6 +64144,125 @@ webpackJsonp([1],{
 
 /***/ },
 
+/***/ 328:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var load = __webpack_require__(329);
+
+	load.keys().forEach(load);
+
+		exports.default = 'mDirectives';
+
+/***/ },
+
+/***/ 329:
+/***/ function(module, exports, __webpack_require__) {
+
+	var map = {
+		"./RatingStarDirective.js": 330
+	};
+	function webpackContext(req) {
+		return __webpack_require__(webpackContextResolve(req));
+	};
+	function webpackContextResolve(req) {
+		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
+	};
+	webpackContext.keys = function webpackContextKeys() {
+		return Object.keys(map);
+	};
+	webpackContext.resolve = webpackContextResolve;
+	module.exports = webpackContext;
+	webpackContext.id = 329;
+
+
+/***/ },
+
+/***/ 330:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _mDirectives = __webpack_require__(331);
+
+	var _mDirectives2 = _interopRequireDefault(_mDirectives);
+
+	var _lodash = __webpack_require__(327);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	_mDirectives2.default.directive('starRating', function () {
+	    return {
+	        restrict: 'EA',
+	        template: '<ul class="star-rating" ng-class="{readonly: readonly}">' + '  <li ng-repeat="star in stars" class="star" ng-class="{filled: star.filled}" ng-click="toggle($index)">' + '    <i class="fa fa-star"></i>' + // or &#9733
+	        '  </li>' + '</ul>',
+	        scope: {
+	            ratingValue: '=ngModel',
+	            max: '=?', // optional (default is 5)
+	            onRatingSelect: '&?',
+	            readonly: '=?'
+	        },
+	        link: function link(scope) {
+	            if (_lodash2.default.isUndefined(scope.max)) {
+	                scope.max = 5;
+	            }
+	            function updateStars() {
+	                scope.stars = _lodash2.default.map(Array(scope.max), function (value, ix) {
+	                    return { filled: ix < scope.ratingValue };
+	                });
+	            }
+	            scope.toggle = function (index) {
+	                if (_lodash2.default.isUndefined(scope.readonly) || scope.readonly === false) {
+	                    scope.ratingValue = index + 1;
+	                    if (_lodash2.default.isFunction(scope.onRatingSelect)) {
+	                        scope.onRatingSelect({
+	                            rating: index + 1
+	                        });
+	                    }
+	                }
+	            };
+	            scope.$watch('ratingValue', function (oldValue, newValue) {
+	                if (newValue) {
+	                    updateStars();
+	                }
+	            });
+	        }
+	    };
+		});
+
+/***/ },
+
+/***/ 331:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _getModuleInstance = __webpack_require__(316);
+
+	var _getModuleInstance2 = _interopRequireDefault(_getModuleInstance);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * Create directives module
+	 */
+
+	var mDirectives = (0, _getModuleInstance2.default)('mDirectives');
+
+		exports.default = mDirectives;
+
+/***/ },
+
 /***/ 332:
 /***/ function(module, exports, __webpack_require__) {
 
@@ -64312,7 +64316,7 @@ webpackJsonp([1],{
 
 	var _cuid2 = _interopRequireDefault(_cuid);
 
-	var _lodash = __webpack_require__(331);
+	var _lodash = __webpack_require__(327);
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
