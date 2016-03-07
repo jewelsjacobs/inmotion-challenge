@@ -48,18 +48,17 @@ which by default can only accept an array
         $ npm run build-dev
         $ gulp
         ```
-
-- Used AngularJS with MVC architecture
-- Has Movie search
-- Has at least one Service, Controller, Directive and Filter (filter is inline for search)
-- **bonus** Used lodash
-- **bonus** Used bootstrap
+- AngularJS with MVC architecture
+- Movie search
+- At least one Service, Controller, Directive and Filter (filter is inline for search)
+- **bonus** lodash
+- **bonus** bootstrap
 
 ## If I had more time . .
 I would have:
 
-- added unit / e2e tests
-- added api documentation
+- unit / e2e tests
+- api documentation
 - stuck to git flow convention with cleaner squashed commits
 - cleaned up some of the boilerplate cruft
 
