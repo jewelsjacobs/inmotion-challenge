@@ -1,9 +1,9 @@
 import mServices from './_mServices';
 import cuid from 'cuid';
+import _ from 'lodash';
 
 mServices.service('ApiService', function ($http, localStorageService, $q) {
     const FIREBASE_URL = 'https://inmotion-challange.firebaseio.com/';
-    const deferred = $q.defer();
 
     this.firebase = {
         /*
@@ -85,71 +85,81 @@ mServices.service('ApiService', function ($http, localStorageService, $q) {
     };
     this.localStorage = {
         findAll: () => {
-            setTimeout(() => {
-                deferred.notify('getting movies');
-                let movies;
+            return $q((resolve, reject) => {
+                setTimeout(() => {
+                    let movies;
+                    let movie;
 
-                if (typeof localStorageService.keys() === 'string'
-                    && typeof JSON.parse(localStorageService.get(localStorageService.keys())).edited !== 'undefined') {
-                    movies = Object.assign(
-                        {
-                            [localStorageService.keys()]: JSON.parse(localStorageService.get(localStorageService.keys()))
-                        }
-                    );
-                } else if (Array.isArray(localStorageService.keys())) {
-                    localStorageService.keys().forEach((key) => {
-                         if (typeof JSON.parse(localStorageService.get(key)).edited !== 'undefined') {
-                            movies = Object.assign(
-                                {
-                                    [key]: JSON.parse(localStorageService.get(key))
-                                }
-                            );
-                        }
+                    _.forEach(localStorageService.keys(), (key) => {
+                        movie = JSON.parse(localStorageService.get(key));
+                        movies = _.assign(movies, { [key]: movie });
                     });
-                }
-                console.log(movies, localStorageService.keys());
-                if (movies) {
-                    deferred.resolve(movies);
-                } else {
-                    deferred.reject('There was a problem loading the movies');
-                }
-            }, 10);
 
-            return deferred.promise;
+                    if (_.isObject(movies)) {
+                        resolve(movies);
+                    } else {
+                        reject('There was a problem loading the movies');
+                    }
+                }, 10);
+            });
         },
         find: (id) => {
-            setTimeout(() => {
-                deferred.notify('finding movie');
-                deferred.resolve(JSON.parse(localStorageService.get(id)));
-            }, 10);
+            return $q((resolve, reject) => {
+                setTimeout(() => {
+                    const movie = JSON.parse(localStorageService.get(id));
 
-            return deferred.promise;
+                    if (_.isObject(movie)) {
+                        resolve(movie);
+                    } else {
+                        reject('movie data was not returned correctly');
+                    }
+                }, 10);
+            });
         },
         add: (movie) => {
-            setTimeout(() => {
-                deferred.notify('adding movie');
-                deferred.resolve(localStorageService.set(cuid(), JSON.stringify(movie)));
-            }, 10);
+            return $q((resolve, reject) => {
+                setTimeout(() => {
+                    const id = cuid();
 
-            return deferred.promise;
+                    localStorageService.set(id, JSON.stringify(movie));
+                    const savedMovie = JSON.parse(localStorageService.get(id));
+
+                    if (_.isObject(savedMovie)) {
+                        resolve(savedMovie);
+                    } else {
+                        reject('movie was not saved');
+                    }
+                }, 10);
+            });
         },
         update: (movie, id) => {
-            localStorageService.remove(id);
-            setTimeout(() => {
-                deferred.notify('updating movie');
-                deferred.resolve(localStorageService.set(id, JSON.stringify(movie)));
-            }, 10);
+            return $q((resolve, reject) => {
+                setTimeout(() => {
+                    localStorageService.remove(id);
 
-            return deferred.promise;
+                    localStorageService.set(id, JSON.stringify(movie));
+                    const updatedMovie = JSON.parse(localStorageService.get(id));
+
+                    if (_.isObject(updatedMovie)) {
+                        resolve(updatedMovie);
+                    } else {
+                        reject('movie was not updated');
+                    }
+                }, 10);
+            });
         },
         remove: (id) => {
-            localStorageService.remove(id);
-            setTimeout(() => {
-                deferred.notify('deleting movie');
-                deferred.resolve(localStorageService.remove(id));
-            }, 10);
+            return $q((resolve, reject) => {
+                setTimeout(() => {
+                    localStorageService.remove(id);
 
-            return deferred.promise;
+                    if (_.indexOf(localStorageService.keys(), id) === -1) {
+                        resolve('movie was deleted');
+                    } else {
+                        reject('movie was not deleted');
+                    }
+                }, 10);
+            });
         }
     };
 });

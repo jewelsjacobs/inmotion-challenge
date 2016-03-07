@@ -19,28 +19,28 @@ angular.module('movieApp', [ngTouch, ngSanitize, uiRouter,
         $stateProvider.state('movies', {
             url: '/movies',
             templateUrl: 'tpls/partials/movies.html',
+            cache: false,
             controller: 'MovieListCtrl'
         }).state('viewMovie', {
-            url: '/movies/:id/view',
+            url: '/movies/{id}/view',
             templateUrl: 'tpls/partials/movie-view.html',
+            cache: false,
             controller: 'MovieViewCtrl'
         }).state('newMovie', {
             url: '/movies/new',
             templateUrl: 'tpls/partials/movie-add.html',
+            cache: false,
             controller: 'MovieCreateCtrl'
         }).state('editMovie', {
-            url: '/movies/:id/edit',
+            url: '/movies/{id}/edit',
             templateUrl: 'tpls/partials/movie-edit.html',
+            cache: false,
             controller: 'MovieEditCtrl'
         });
 
         $locationProvider.html5Mode(true);
 
         localStorageServiceProvider.setPrefix('movieApp');
-        $urlRouterProvider.otherwise(function ($injector) {
-            const $state = $injector.get('$state');
-
-            $state.go('movies');
-        });
+        $urlRouterProvider.otherwise('movies');
     })
     .constant('API', 'localStorage');

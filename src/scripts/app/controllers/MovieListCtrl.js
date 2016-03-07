@@ -1,6 +1,6 @@
 import mCtrls from './_mCtrls';
 
-mCtrls.controller('MovieListCtrl', ($scope, $state, PopupService, $window, MovieService) => {
+mCtrls.controller('MovieListCtrl', ($scope, $state, $stateParams, PopupService, $window, MovieService) => {
     MovieService.getMovies().then((movies) => {
         $scope.movies = movies;
     });

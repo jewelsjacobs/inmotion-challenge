@@ -1,4 +1,5 @@
 import mDirectives from './_mDirectives';
+import _ from 'lodash';
 
 mDirectives.directive('starRating', function () {
     return {
@@ -16,23 +17,22 @@ mDirectives.directive('starRating', function () {
             readonly: '=?'
         },
         link: function (scope) {
-            if (scope.max === undefined) {
+            if (_.isUndefined(scope.max)) {
                 scope.max = 5;
             }
             function updateStars() {
-                scope.stars = [];
-                for (let i = 0; i < scope.max; i++) {
-                    scope.stars.push({
-                        filled: i < scope.ratingValue
-                    });
-                }
+                scope.stars = _.map(Array(scope.max), (value, ix) => {
+                    return { filled: ix < scope.ratingValue };
+                });
             }
             scope.toggle = function (index) {
-                if (scope.readonly === undefined || scope.readonly === false) {
+                if (_.isUndefined(scope.readonly) || scope.readonly === false) {
                     scope.ratingValue = index + 1;
-                    scope.onRatingSelect({
-                        rating: index + 1
-                    });
+                    if (_.isFunction(scope.onRatingSelect)) {
+                        scope.onRatingSelect({
+                            rating: index + 1
+                        });
+                    }
                 }
             };
             scope.$watch('ratingValue', (oldValue, newValue) => {
