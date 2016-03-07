@@ -19,7 +19,7 @@ describe('Controllers', function () {
         }));
 
         it('Placeholder', function () {
-            expect($scope.test).toBe('test');
+            expect($scope.test).to.be('test');
         });
 
     });

@@ -16,7 +16,7 @@ module.exports = function (config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine'],
+        frameworks: ['mocha', 'chai'],
 
 
         // list of files / patterns to load in the browser
@@ -24,6 +24,12 @@ module.exports = function (config) {
             'test/unit/_enterSpec.js'
         ],
 
+        client: {
+            mocha: {
+                reporter: 'html', // change Karma's debug.html to the mocha web reporter
+                ui: 'tdd'
+            }
+        },
 
         // list of files to exclude
         exclude: [],

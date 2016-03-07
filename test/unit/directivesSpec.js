@@ -20,7 +20,7 @@ describe('Directives', function () {
         element = $compile('<div ng-bind="variable"></div>')(scope);
         scope.$digest();
 
-        expect(element.html()).toContain('Hello World');
+        expect(element.html()).to.contain('Hello World');
     });
 
 });
